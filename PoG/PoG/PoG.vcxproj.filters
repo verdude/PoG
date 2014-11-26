@@ -23,5 +23,14 @@
     <ClInclude Include="PoG.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="themainbro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -38,7 +38,7 @@ private:
 
 	SDL_Surface* loadImage(string s) {
 		background = loadImage("cornfield.png");
-		cherub.push_back(loadImage("larry.png"));
+		cherub.push_back(loadImage("chars/cherubim.png"));
 	}
 	void loadMap(string filename) {
 
