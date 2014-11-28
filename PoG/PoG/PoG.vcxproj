@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Santi\Desktop\VS_dev\SDL2_image-devel-2.0.0-VC\SDL2_image-2.0.0\include;C:\Users\Santi\Desktop\VS_dev\SDL2-2.0.3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Santi\Desktop\VS_dev\SDL2_image-devel-2.0.0-VC\SDL2_image-2.0.0\lib\x86;C:\Users\Santi\Desktop\VS_dev\SDL2-2.0.3\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Santi\Desktop\VS_dev\SDL2_ttf-devel-2.0.12-VC\SDL2_ttf-2.0.12\include;C:\Users\Santi\Desktop\VS_dev\SDL2_image-devel-2.0.0-VC\SDL2_image-2.0.0\include;C:\Users\Santi\Desktop\VS_dev\SDL2-2.0.3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Santi\Desktop\VS_dev\SDL2_ttf-devel-2.0.12-VC\SDL2_ttf-2.0.12\lib\x86;C:\Users\Santi\Desktop\VS_dev\SDL2_image-devel-2.0.0-VC\SDL2_image-2.0.0\lib\x86;C:\Users\Santi\Desktop\VS_dev\SDL2-2.0.3\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -50,7 +50,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>

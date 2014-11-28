@@ -3,43 +3,64 @@
 #include <vector>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
+
+#include "Wrapper.h"
+#include "themainbro.h"
 
 using namespace std;
 
 class PoG {
 private:
-	SDL_Surface *background, *screen, *block;
+	SDL_Surface *screen, *block;
 	SDL_Rect camera;
 	SDL_Window* window;
+	SDL_Renderer* renderer;
 	// matrix of the blocks
 	vector<vector<int> > map;
-	vector<SDL_Surface*> cherub;
+
+	Wrapper background;
+	themainbro cherub;
+	
+
 	// direction the player is facing
 	bool dir[2];
 	static const int SC_WIDTH = 640;
 	static const int SC_HEIGHT = 480;
 
-	SDL_Surface* loadSurface(string path) {
-		SDL_Surface* optimizedSurface = NULL;
-		SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-		if (loadedSurface == NULL) {
-			//printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-		}
-		else {
-			optimizedSurface = SDL_ConvertSurface(loadedSurface, screen->format, NULL);
-			if (optimizedSurface != NULL) {
-				//printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-				//SDL_SetColorKey(optimizedSurface, SDL_SRCCOLORKEY, SDL_MapRGB(optimizedImage->format, 0xFF, 0, 0xFF));
+	bool initialize() {
+		bool success = true;
+		if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+			success = false;
+		} else {
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+			window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+				SC_WIDTH, SC_HEIGHT, SDL_WINDOW_SHOWN);
+			if (window == NULL) {
+				success = false;
+			} else {
+				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+				if (renderer == NULL) {
+					success = false;
+				} else {
+					SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+					int imgFlags = IMG_INIT_PNG;
+					if (!(IMG_Init(imgFlags) & imgFlags)) {
+						success = false;
+					}
+				}
 			}
-			SDL_FreeSurface(loadedSurface);
 		}
-		return optimizedSurface;
+		return success;
 	}
 
-	SDL_Surface* loadImage(string s) {
-		background = loadImage("cornfield.png");
-		cherub.push_back(loadImage("chars/cherubim.png"));
+	bool loadImages() {
+		bool success = true;
+		background.loadFromFile("cornfield.png", renderer);
+
+		return success;
 	}
+
 	void loadMap(string filename) {
 
 	}
@@ -50,21 +71,40 @@ private:
 
 	}
 	void terminate() {
-		SDL_FreeSurface(background);
-		background = NULL;
-		for (unsigned i = 0; i < cherub.size(); ++i) {
-			SDL_FreeSurface(cherub[i]);
-			cherub[i] = NULL;
-		}
-		cherub.clear();
 		SDL_DestroyWindow(window);
 		window = NULL;
 		IMG_Quit();
 		SDL_Quit();
 	}
 
+	void getKeyStates() {
+		themainbro curr = NULL;
+		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
+		if (currentKeyStates[SDL_SCANCODE_UP])
+		{
+			cherub = curr;
+		}
+		else if (currentKeyStates[SDL_SCANCODE_DOWN])
+		{
+			cherub = &gDownTexture;
+		}
+		else if (currentKeyStates[SDL_SCANCODE_LEFT])
+		{
+			currentTexture = &gLeftTexture;
+		}
+		else if (currentKeyStates[SDL_SCANCODE_RIGHT])
+		{
+			currentTexture = &gRightTexture;
+		}
+		else
+		{
+			currentTexture = &gPressTexture;
+		}
+	}
+
 public:
-	PoG() : cherub() {
+
+	PoG() : background(), cherub() {
 		window = SDL_CreateWindow("PoG", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			SC_WIDTH, SC_HEIGHT, SDL_WINDOW_SHOWN);
 		screen = SDL_GetWindowSurface(window);
@@ -74,6 +114,30 @@ public:
 		terminate();
 	}
 	void play() {
+		if (!initialize()) {
+			system("PAUSE");
+			return;
+		}
+		if (!loadImages()) {
+			system("PAUSE");
+			return;
+		}
+		bool quit = false;
+		SDL_Event e;
+		while (!quit) {
+			while (SDL_PollEvent(&e)) {
+				if (e.type == SDL_QUIT) {
+					quit = true;
+				}
+			}
 
+			getKeyStates();
+
+			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_RenderClear(renderer);
+			background.render(0, 0, renderer);
+
+			SDL_RenderPresent(renderer);
+		}
 	}
 };
