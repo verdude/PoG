@@ -34,7 +34,7 @@ private:
 			success = false;
 		} else {
 			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-			window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			window = SDL_CreateWindow("PoG", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 				SC_WIDTH, SC_HEIGHT, SDL_WINDOW_SHOWN);
 			if (window == NULL) {
 				success = false;
@@ -78,35 +78,33 @@ private:
 	}
 
 	void getKeyStates() {
-		themainbro curr = NULL;
+		//themainbro curr = NULL;
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 		if (currentKeyStates[SDL_SCANCODE_UP])
 		{
-			cherub = curr;
+			// change the velocity
 		}
 		else if (currentKeyStates[SDL_SCANCODE_DOWN])
 		{
-			cherub = &gDownTexture;
+			// change the velocity
 		}
 		else if (currentKeyStates[SDL_SCANCODE_LEFT])
 		{
-			currentTexture = &gLeftTexture;
+			// change the velocity	
 		}
 		else if (currentKeyStates[SDL_SCANCODE_RIGHT])
 		{
-			currentTexture = &gRightTexture;
+			
 		}
 		else
 		{
-			currentTexture = &gPressTexture;
+			
 		}
 	}
 
 public:
 
 	PoG() : background(), cherub() {
-		window = SDL_CreateWindow("PoG", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			SC_WIDTH, SC_HEIGHT, SDL_WINDOW_SHOWN);
 		screen = SDL_GetWindowSurface(window);
 		camera.x = camera.y = 0;
 	}

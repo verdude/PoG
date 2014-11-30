@@ -28,8 +28,8 @@ private:
 	int health;
 public:
 	// first load the images then 
-	themainbro(vector<Wrapper> imgs) :
-		imgs(imgs), box(), xvel(), yvel(), ground(), jump(), 
+	themainbro(/*vector<Wrapper> imgs*/) :
+		imgs(/*imgs*/), box(), xvel(), yvel(), ground(), jump(), 
 		direction('r'), frame(0.0), moving(), health(10)
 	{
 		box.w = 50;
