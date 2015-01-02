@@ -73,27 +73,25 @@ private:
 	int getKeyStates() {
 		//themainbro curr = NULL;
 		const Uint8* currState = SDL_GetKeyboardState(NULL);
-		// for now return 0 because we only have one sprite and don't need to switch
-		return 0;
 		if (currState[SDL_SCANCODE_UP])
 		{
-			// change the velocity
+			return DEFAULT;
 		}
 		else if (currState[SDL_SCANCODE_DOWN])
 		{
-			// change the velocity
+			return DEFAULT;
 		}
 		else if (currState[SDL_SCANCODE_LEFT])
 		{
-			// change the velocity	
+			return DEFAULT;
 		}
 		else if (currState[SDL_SCANCODE_RIGHT])
 		{
-			
+			return DEFAULT;
 		}
 		else
 		{
-			
+			return DEFAULT;
 		}
 	}
 
@@ -117,21 +115,23 @@ public:
 		}
 		bool quit = false;
 		SDL_Event e;
+		int state = 0;
 		while (!quit) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) {
 					quit = true;
 				}
+				cherub.handle_input(e);
 			}
 
-			int state = getKeyStates();
-
 			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-			SDL_RenderClear(renderer);
+			cherub.move(state);
 
+			SDL_RenderClear(renderer);
 			background.render(0, 0, renderer);
 			cherub.show(renderer, state);
 
+			state = getKeyStates();
 			SDL_RenderPresent(renderer);
 		}
 	}

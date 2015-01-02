@@ -12,7 +12,8 @@ using namespace std;
 enum dir {
 	DEFAULT,
 	FACE_LEFT,
-	FACE_RIGHT
+	FACE_RIGHT,
+	NO_CHANGE
 };
 
 class themainbro : collision {
@@ -47,6 +48,7 @@ public:
 		imgs(imgs), box(), xvel(), yvel(), ground(), jump(),
 		direction('r'), frame(0.0), moving(), health(10)
 	{
+		box.y = 480 - h;
 		box.w = w;
 		box.h = h;
 	}
@@ -68,7 +70,30 @@ public:
 		return xvel;
 	}
 
-	void move() {
+	void handle_input(SDL_Event e) {
+		if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
+		{
+			switch (e.key.keysym.sym) {
+				case SDLK_UP: yvel -= 10; break;
+				case SDLK_DOWN: yvel += 10; break;
+				case SDLK_LEFT: xvel -= 10; break;
+				case SDLK_RIGHT: xvel += 10; break;
+			}
+		}
+		else if (e.type == SDL_KEYUP && e.key.repeat == 0)
+		{
+			switch (e.key.keysym.sym) {
+				case SDLK_UP: yvel += 10; break;
+				case SDLK_DOWN: yvel -= 10; break;
+				case SDLK_LEFT: xvel += 10; break;
+				case SDLK_RIGHT: xvel -= 10; break;
+			}
+			/*if (newstate) apply_surface(x, y, AlexBird[1], screen);
+			else apply_surface(x, y, AlexBird[1], screen);*/
+		}
+	}
+
+	void move(const int& state) {
 		// needs to take parameters that will tell it which way to go
 		box.x += xvel;
 		if ((box.x < 0) || (box.x + box.w > 640)) {
@@ -111,10 +136,6 @@ public:
 
 	void setHealth(int h) {
 		health = h;
-	}
-
-	int Ystart() {
-		return 480 - box.h;
 	}
 
 	void addSprite(string filename, SDL_Renderer*& renderer) {
