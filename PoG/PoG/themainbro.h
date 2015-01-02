@@ -19,7 +19,7 @@ class themainbro : collision {
 private:
 	SDL_Rect box;
 	int xvel, yvel;
-	SDL_Rect clips[4];
+	int xpos, ypos;
 	vector<Wrapper> imgs;
 	bool ground, jump;
 	char direction;
@@ -27,13 +27,28 @@ private:
 	bool moving;
 	int health;
 public:
-	// first load the images then 
-	themainbro(/*vector<Wrapper> imgs*/) :
-		imgs(/*imgs*/), box(), xvel(), yvel(), ground(), jump(), 
+	/*
+	themainbro(vector<Wrapper> imgs) :
+		imgs(imgs), box(), xvel(), yvel(), ground(), jump(), 
 		direction('r'), frame(0.0), moving(), health(10)
 	{
 		box.w = 50;
 		box.h = 100;
+	}
+	themainbro() :
+		imgs(), box(), xvel(), yvel(), ground(), jump(),
+		direction('r'), frame(0.0), moving(), health(10)
+	{
+		box.w = 50;
+		box.h = 100;
+	}*/
+	/*set the width and height of the rect*/
+	themainbro(int w = 50, int h = 100, vector<Wrapper> imgs = vector<Wrapper>()) :
+		imgs(imgs), box(), xvel(), yvel(), ground(), jump(),
+		direction('r'), frame(0.0), moving(), health(10)
+	{
+		box.w = w;
+		box.h = h;
 	}
 
 	~themainbro() {
@@ -54,12 +69,19 @@ public:
 	}
 
 	void move() {
-
+		// needs to take parameters that will tell it which way to go
+		box.x += xvel;
+		if ((box.x < 0) || (box.x + box.w > 640)) {
+			box.x -= xvel;
+		}
+		box.y += yvel;
+		if ((box.y < 0) || (box.y + box.h > 480)) {
+			box.y -= yvel;
+		}
 	}
 
-	void show(Wrapper screen) {
-		// render the image...
-		// do i want to do it here?
+	void show(SDL_Renderer*& renderer, const int& dir = DEFAULT) {
+		imgs[dir].render(box.x, box.y, renderer);
 	}
 
 	void setJump() {
@@ -89,6 +111,23 @@ public:
 
 	void setHealth(int h) {
 		health = h;
+	}
+
+	int Ystart() {
+		return 480 - box.h;
+	}
+
+	void addSprite(string filename, SDL_Renderer*& renderer) {
+		Wrapper temp;
+		imgs.push_back(temp);
+		imgs[imgs.size() - 1].loadFromFile(filename, renderer);
+		/* I'm not sure how to do error checking here. */
+
+	}
+
+	/*idk if this is necessary*/
+	Wrapper getDefaultWrapper() {
+		return imgs.size() ? imgs[0] : Wrapper();
 	}
 
 };

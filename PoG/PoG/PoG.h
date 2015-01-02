@@ -21,8 +21,6 @@ private:
 
 	Wrapper background;
 	themainbro cherub;
-	
-
 	// direction the player is facing
 	bool dir[2];
 	static const int SC_WIDTH = 640;
@@ -39,7 +37,7 @@ private:
 			if (window == NULL) {
 				success = false;
 			} else {
-				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 				if (renderer == NULL) {
 					success = false;
 				} else {
@@ -56,20 +54,15 @@ private:
 
 	bool loadImages() {
 		bool success = true;
+		cherub.addSprite("chars/cherubim.png", renderer);
 		background.loadFromFile("cornfield.png", renderer);
-
 		return success;
 	}
 
-	void loadMap(string filename) {
-
-	}
-	void showMap() {
-
-	}
 	void handEvents() {
 
 	}
+
 	void terminate() {
 		SDL_DestroyWindow(window);
 		window = NULL;
@@ -77,22 +70,24 @@ private:
 		SDL_Quit();
 	}
 
-	void getKeyStates() {
+	int getKeyStates() {
 		//themainbro curr = NULL;
-		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-		if (currentKeyStates[SDL_SCANCODE_UP])
+		const Uint8* currState = SDL_GetKeyboardState(NULL);
+		// for now return 0 because we only have one sprite and don't need to switch
+		return 0;
+		if (currState[SDL_SCANCODE_UP])
 		{
 			// change the velocity
 		}
-		else if (currentKeyStates[SDL_SCANCODE_DOWN])
+		else if (currState[SDL_SCANCODE_DOWN])
 		{
 			// change the velocity
 		}
-		else if (currentKeyStates[SDL_SCANCODE_LEFT])
+		else if (currState[SDL_SCANCODE_LEFT])
 		{
 			// change the velocity	
 		}
-		else if (currentKeyStates[SDL_SCANCODE_RIGHT])
+		else if (currState[SDL_SCANCODE_RIGHT])
 		{
 			
 		}
@@ -104,7 +99,7 @@ private:
 
 public:
 
-	PoG() : background(), cherub() {
+	PoG() : background(), cherub(80, 80) {
 		screen = SDL_GetWindowSurface(window);
 		camera.x = camera.y = 0;
 	}
@@ -113,11 +108,11 @@ public:
 	}
 	void play() {
 		if (!initialize()) {
-			system("PAUSE");
+			//system("PAUSE");
 			return;
 		}
 		if (!loadImages()) {
-			system("PAUSE");
+			//system("PAUSE");
 			return;
 		}
 		bool quit = false;
@@ -129,11 +124,13 @@ public:
 				}
 			}
 
-			getKeyStates();
+			int state = getKeyStates();
 
-			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
+
 			background.render(0, 0, renderer);
+			cherub.show(renderer, state);
 
 			SDL_RenderPresent(renderer);
 		}
