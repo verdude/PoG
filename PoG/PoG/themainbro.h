@@ -6,6 +6,7 @@
 
 #include "Wrapper.h"
 #include "collision.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -19,14 +20,15 @@ enum dir {
 class themainbro : collision {
 private:
 	SDL_Rect box;
-	int xvel, yvel;
-	int xpos, ypos;
+	double xvel, yvel;
+	double xpos, ypos;
 	vector<Wrapper> imgs;
 	bool ground, jump;
 	char direction;
 	double frame;
 	bool moving;
 	int health;
+	const double speed;
 public:
 	/*
 	themainbro(vector<Wrapper> imgs) :
@@ -46,7 +48,7 @@ public:
 	/*set the width and height of the rect*/
 	themainbro(int w = 50, int h = 100, vector<Wrapper> imgs = vector<Wrapper>()) :
 		imgs(imgs), box(), xvel(), yvel(), ground(), jump(),
-		direction('r'), frame(0.0), moving(), health(10)
+		direction('r'), frame(0.0), moving(), health(10), speed(1)
 	{
 		box.y = 480 - h;
 		box.w = w;
@@ -70,38 +72,44 @@ public:
 		return xvel;
 	}
 
-	void handle_input(SDL_Event e) {
+	void handle_input(SDL_Event& e) {
 		if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
 		{
 			switch (e.key.keysym.sym) {
-				case SDLK_UP: yvel -= 10; break;
-				case SDLK_DOWN: yvel += 10; break;
-				case SDLK_LEFT: xvel -= 10; break;
-				case SDLK_RIGHT: xvel += 10; break;
+				case SDLK_UP: yvel -= speed; break;
+				case SDLK_DOWN: yvel += speed; break;
+				case SDLK_LEFT: xvel -= speed; break;
+				case SDLK_RIGHT: xvel += speed; break;
 			}
 		}
 		else if (e.type == SDL_KEYUP && e.key.repeat == 0)
 		{
 			switch (e.key.keysym.sym) {
-				case SDLK_UP: yvel += 10; break;
-				case SDLK_DOWN: yvel -= 10; break;
-				case SDLK_LEFT: xvel += 10; break;
-				case SDLK_RIGHT: xvel -= 10; break;
+			case SDLK_UP: yvel += speed; break;
+			case SDLK_DOWN: yvel -= speed; break;
+			case SDLK_LEFT: xvel += speed; break;
+			case SDLK_RIGHT: xvel -= speed; break;
 			}
 			/*if (newstate) apply_surface(x, y, AlexBird[1], screen);
 			else apply_surface(x, y, AlexBird[1], screen);*/
 		}
 	}
 
-	void move(const int& state) {
+	void move(const int& state, double t) {
 		// needs to take parameters that will tell it which way to go
-		box.x += xvel;
-		if ((box.x < 0) || (box.x + box.w > 640)) {
-			box.x -= xvel;
+		box.x += xvel * t;
+		if (box.x < 0) {
+			box.x = 0;
+		}
+		else if (box.x > 640 - box.w) {
+			box.x = 640 - box.w;
 		}
 		box.y += yvel;
-		if ((box.y < 0) || (box.y + box.h > 480)) {
-			box.y -= yvel;
+		if (box.y < 0) {
+			box.y = 0;
+		}
+		else if (box.y > 640 - box.h) {
+			box.y = 640 - box.h;
 		}
 	}
 
@@ -110,12 +118,12 @@ public:
 	}
 
 	void setJump() {
-		if (ground && !jump) {
+		/*if (ground && !jump) {
 			jump = true;
 			ground = false;
 			yvel = -17; // the starting jump value
 			box.y -= 5;
-		}
+		}*/
 	}
 
 	void setMoving(bool b) {
