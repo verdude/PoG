@@ -9,7 +9,7 @@ using namespace std;
 /*
 	Used as a wrapper for textures. This makes it easy to... do... something...
 */
-
+//a
 class Wrapper {
 private:
 	SDL_Texture* texture;
