@@ -7,6 +7,7 @@
 
 #include "Wrapper.h"
 #include "themainbro.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ private:
 	bool loadImages() {
 		bool success = true;
 		cherub.addSprite("chars/cherubim.png", renderer);
-		background.loadFromFile("cornfield.png", renderer);
+		background.loadFromFile("backdrops/title.png", renderer);
 		return success;
 	}
 
@@ -116,6 +117,9 @@ public:
 		bool quit = false;
 		SDL_Event e;
 		int state = 0;
+		// Timer to regulate movement of the main character
+		Timer cherubTimer;
+
 		while (!quit) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) {
@@ -125,14 +129,20 @@ public:
 			}
 
 			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-			cherub.move(state);
+			double timeStep = cherubTimer.getTicks() / 1000.;
+
+			cherub.move(state, timeStep);
+			
+			cherubTimer.start();
 
 			SDL_RenderClear(renderer);
+			
 			background.render(0, 0, renderer);
 			cherub.show(renderer, state);
-
-			state = getKeyStates();
+			
 			SDL_RenderPresent(renderer);
+			
+			state = getKeyStates();
 		}
 	}
 };

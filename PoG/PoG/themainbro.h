@@ -6,6 +6,7 @@
 
 #include "Wrapper.h"
 #include "collision.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -19,8 +20,8 @@ enum dir {
 class themainbro : collision {
 private:
 	SDL_Rect box;
-	int xvel, yvel;
-	int xpos, ypos;
+	double xvel, yvel;
+	double xpos, ypos;
 	vector<Wrapper> imgs;
 	bool ground, jump;
 	char direction;
@@ -71,7 +72,7 @@ public:
 		return xvel;
 	}
 
-	void handle_input(SDL_Event e) {
+	void handle_input(SDL_Event& e) {
 		if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
 		{
 			switch (e.key.keysym.sym) {
@@ -94,15 +95,21 @@ public:
 		}
 	}
 
-	void move(const int& state) {
+	void move(const int& state, double t) {
 		// needs to take parameters that will tell it which way to go
-		box.x += xvel;
-		if ((box.x < 0) || (box.x + box.w > 640)) {
-			box.x -= xvel;
+		box.x += xvel * t;
+		if (box.x < 0) {
+			box.x = 0;
+		}
+		else if (box.x > 640 - box.w) {
+			box.x = 640 - box.w;
 		}
 		box.y += yvel;
-		if ((box.y < 0) || (box.y + box.h > 480)) {
-			box.y -= yvel;
+		if (box.y < 0) {
+			box.y = 0;
+		}
+		else if (box.y > 640 - box.h) {
+			box.y = 640 - box.h;
 		}
 	}
 
@@ -111,12 +118,12 @@ public:
 	}
 
 	void setJump() {
-		if (ground && !jump) {
+		/*if (ground && !jump) {
 			jump = true;
 			ground = false;
 			yvel = -17; // the starting jump value
 			box.y -= 5;
-		}
+		}*/
 	}
 
 	void setMoving(bool b) {
