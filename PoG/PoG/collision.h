@@ -4,6 +4,13 @@
 
 using namespace std;
 
+enum dir {
+	DEFAULT,
+	FACE_LEFT,
+	FACE_RIGHT,
+	NO_CHANGE
+};
+
 class collision {
 protected:
 	static SDL_Rect coord;

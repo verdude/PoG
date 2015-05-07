@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="themainbro.h" />
     <ClInclude Include="PoG.h" />
     <ClInclude Include="Timer.h" />

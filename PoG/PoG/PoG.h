@@ -56,7 +56,7 @@ private:
 	bool loadImages() {
 		bool success = true;
 		cherub.addSprite("chars/cherubim.png", renderer);
-		background.loadFromFile("backdrops/title.png", renderer);
+		background.loadFromFile("backdrops/cornfield.png", renderer);
 		return success;
 	}
 
@@ -131,7 +131,7 @@ public:
 			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			double timeStep = cherubTimer.getTicks() / 1000.;
 
-			cherub.move(state, timeStep);
+			cherub.move(state);
 			
 			cherubTimer.start();
 
