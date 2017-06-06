@@ -7,7 +7,7 @@ CFLAGS=-I$(IDIR) -std=c++11
 LDIR=./
 # LDIR=lib
 
-LIBS=-lSDL2
+LIBS=-lSDL2 -lSDL2_image -lSDL_ttf
 
 make:
 	$(CC) -o build *.cpp $(CFLAGS) $(LIBS)

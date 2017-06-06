@@ -3,7 +3,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL/SDL_ttf.h>
 
 #include "Wrapper.h"
 #include "themainbro.h"
