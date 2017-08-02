@@ -1,13 +1,11 @@
-PoG
-===
+# PoG
+###### ===
+###### Protector of the Garden
+###### Sidescroller
+###### =======
 
-Protector of the Garden
-
-Sidescroller
-=======
+###### Development Dependencies
 #!/bin/bash
-
-## Development Dependencies
 sudo apt install            \
     libsdl2-dev             \
     libsdl2-image-dev       \
