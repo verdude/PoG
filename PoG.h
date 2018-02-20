@@ -129,9 +129,9 @@ public:
 			}
 
 			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-			double timeStep = cherubTimer.getTicks() / 1000.;
+			double timeStep = cherubTimer.getTicks() / 1000.f;
 
-			cherub.move(state);
+			cherub.move(state, timeStep);
 			
 			cherubTimer.start();
 
