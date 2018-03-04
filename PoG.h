@@ -55,8 +55,13 @@ private:
 
 	bool loadImages() {
 		bool success = true;
-		cherub.addSprite("chars/cherubim.png", renderer);
+		cherub.addSprite("chars/walk1right.png", renderer, 'r');
+		cherub.addSprite("chars/walk1left.png", renderer, 'l');
+		cherub.addSprite("chars/neutralright.png", renderer, 'r');
+		cherub.addSprite("chars/neutralleft.png", renderer, 'l');
 		background.loadFromFile("backdrops/cornfield.png", renderer);
+        //background.printAddress();
+        //cherub.printImgAddresses();
 		return success;
 	}
 
@@ -137,7 +142,7 @@ public:
 
 			SDL_RenderClear(renderer);
 			
-			background.render(0, 0, renderer);
+			background.render(0, 0, renderer, false);
 			cherub.show(renderer, state);
 			
 			SDL_RenderPresent(renderer);

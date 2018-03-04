@@ -16,7 +16,8 @@ private:
     SDL_Rect box;
     float xvel, yvel;
     float xpos, ypos;
-    vector<Wrapper> imgs;
+    vector<Wrapper*> rightImgs;
+    vector<Wrapper*> leftImgs;
     bool ground, jump;
     char direction;
     double frame;
@@ -24,24 +25,9 @@ private:
     int health;
     const double speed;
 public:
-    /*
-    themainbro(vector<Wrapper> imgs) :
-    imgs(imgs), box(), xvel(), yvel(), ground(), jump(),
-    direction('r'), frame(0.0), moving(), health(10)
-    {
-    box.w = 50;
-    box.h = 100;
-    }
-    themainbro() :
-    imgs(), box(), xvel(), yvel(), ground(), jump(),
-    direction('r'), frame(0.0), moving(), health(10)
-    {
-    box.w = 50;
-    box.h = 100;
-    }*/
     /*set the width and height of the rect*/
-    themainbro(int w = 50, int h = 100, vector<Wrapper> imgs = vector<Wrapper>()) :
-        imgs(imgs), box(), xvel(), yvel(), ground(), jump(),
+    themainbro(int w = 50, int h = 100) :
+        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(),
         direction('r'), frame(0.0), moving(), health(10), speed(300)
     {
         box.y = 480 - h;
@@ -75,8 +61,14 @@ public:
             switch (e.key.keysym.sym) {
             case SDLK_UP: yvel -= speed; break;
             case SDLK_DOWN: yvel += speed; break;
-            case SDLK_LEFT: xvel -= speed; break;
-            case SDLK_RIGHT: xvel += speed; break;
+            case SDLK_LEFT:
+                    xvel -= speed;
+                    direction = 'l';
+                    break;
+            case SDLK_RIGHT:
+                    xvel += speed;
+                    direction = 'r';
+                    break;
             }
         }
         else if (e.type == SDL_KEYUP && e.key.repeat == 0)
@@ -84,8 +76,14 @@ public:
             switch (e.key.keysym.sym) {
             case SDLK_UP: yvel += speed; break;
             case SDLK_DOWN: yvel -= speed; break;
-            case SDLK_LEFT: xvel += speed; break;
-            case SDLK_RIGHT: xvel -= speed; break;
+            case SDLK_LEFT:
+                    xvel += speed;
+                    direction = 'l';
+                    break;
+            case SDLK_RIGHT:
+                    xvel -= speed;
+                    direction = 'r';
+                    break;
             }
         }
     }
@@ -110,7 +108,13 @@ public:
     }
 
     void show(SDL_Renderer*& renderer, const int& dir = DEFAULT) {
-        imgs[dir].render((int)xpos, (int)ypos, renderer);
+        //printf("Showing [%s] with dimensions: [%ix%i] and box dimensions of :[ixi]\n", imgs[0].getName().c_str(), imgs[0].getWidth(), imgs[0].getHeight());
+        if (direction == 'r') {
+            rightImgs[0]->render((int)xpos, (int)ypos, renderer);
+        }
+        else {
+            leftImgs[0]->render((int)xpos, (int)ypos, renderer);
+        }
     }
 
     void setJump() {
@@ -142,17 +146,29 @@ public:
         health = h;
     }
 
-    void addSprite(string filename, SDL_Renderer*& renderer) {
-        Wrapper temp;
-        imgs.push_back(temp);
-        imgs[imgs.size() - 1].loadFromFile(filename, renderer);
-        /* I'm not sure how to do error checking here. */
+    void addSprite(string filename, SDL_Renderer*& renderer, char dir) {
+        Wrapper* temp = new Wrapper();
+        temp->loadFromFile(filename, renderer);
 
+        if (dir == 'r') {
+            rightImgs.push_back(temp);
+        }
+        else {
+            leftImgs.push_back(temp);
+        }
     }
 
-    /*idk if this is necessary*/
-    Wrapper getDefaultWrapper() {
-        return imgs.size() ? imgs[0] : Wrapper();
+    Wrapper* getDefaultWrapper() {
+        return direction == 'r' ? (rightImgs.size() > 0 ? rightImgs[0] : NULL) : (leftImgs.size() > 0 ? leftImgs[0] : NULL);
+    }
+
+    void printImgAddresses() {
+        for (unsigned i = 0; i < rightImgs.size(); i++) {
+            rightImgs[i]->printAddress();
+        }
+        for (unsigned i = 0; i < leftImgs.size(); i++) {
+            leftImgs[i]->printAddress();
+        }
     }
 
 };
