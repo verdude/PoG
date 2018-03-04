@@ -39,8 +39,11 @@ public:
     }
 
     ~themainbro() {
-        // free the wrapper...
-        // I think it's automatic
+        for (int i = 0; i < rightImgs.size(); i++)
+            delete rightImgs[i];
+
+        for (int i = 0; i < leftImgs.size(); i++)
+            delete leftImgs[i];
     }
 
     SDL_Rect* getRect() {

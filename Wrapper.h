@@ -20,7 +20,7 @@ public:
 	Wrapper(SDL_Texture* temp = NULL) : 
 		texture(temp), width(), height() {}
 	~Wrapper() {
-		free(true);
+		free();
 	}
 
 	bool loadFromFile(string path, SDL_Renderer*& renderer) {
@@ -51,10 +51,9 @@ public:
 		return texture != NULL;
 	}
 
-	void free(bool destroy = false) {
+	void free() {
 		if (texture != NULL)
 		{
-            if (destroy) printf("Should not get here\n");
 			SDL_DestroyTexture(texture);
 			texture = NULL;
 			width = 0;

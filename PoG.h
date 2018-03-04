@@ -20,7 +20,7 @@ private:
 	// matrix of the blocks
 	vector<vector<int> > map;
 
-	Wrapper background;
+	Wrapper* background;
 	themainbro cherub;
 	// direction the player is facing
 	bool dir[2];
@@ -59,9 +59,7 @@ private:
 		cherub.addSprite("chars/walk1left.png", renderer, 'l');
 		cherub.addSprite("chars/neutralright.png", renderer, 'r');
 		cherub.addSprite("chars/neutralleft.png", renderer, 'l');
-		background.loadFromFile("backdrops/cornfield.png", renderer);
-        //background.printAddress();
-        //cherub.printImgAddresses();
+		background->loadFromFile("backdrops/cornfield.png", renderer);
 		return success;
 	}
 
@@ -74,6 +72,7 @@ private:
 		window = NULL;
 		IMG_Quit();
 		SDL_Quit();
+        delete background;
 	}
 
 	int getKeyStates() {
@@ -103,9 +102,10 @@ private:
 
 public:
 
-	PoG() : background(), cherub(80, 80) {
+	PoG() : cherub(80, 80) {
 		screen = SDL_GetWindowSurface(window);
 		camera.x = camera.y = 0;
+        background = new Wrapper();
 	}
 	~PoG() {
 		terminate();
@@ -142,7 +142,7 @@ public:
 
 			SDL_RenderClear(renderer);
 			
-			background.render(0, 0, renderer, false);
+			background->render(0, 0, renderer, false);
 			cherub.show(renderer, state);
 			
 			SDL_RenderPresent(renderer);
