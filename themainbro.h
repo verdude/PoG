@@ -152,13 +152,13 @@ public:
         unsigned i = keys.right || keys.left ? frame / interval : 0;
 
         if (direction == 'r') {
-            if (rightImgs[i]->getWidth() != box.w)
-                box.w = rightImgs[i]->getWidth();
+            box.w = rightImgs[i]->getWidth();
+            box.h = rightImgs[i]->getHeight();
             rightImgs[i]->render((int)xpos, (int)ypos, renderer);
         }
         else {
-            if (leftImgs[i]->getWidth() != box.w)
-                box.w = leftImgs[i]->getWidth();
+            box.w = leftImgs[i]->getWidth();
+            box.h = leftImgs[i]->getHeight();
             leftImgs[i]->render((int)xpos, (int)ypos, renderer);
         }
     }
