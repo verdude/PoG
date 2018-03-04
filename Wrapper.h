@@ -43,7 +43,6 @@ public:
 			else {
 				width = loadedSurface->w;
 				height = loadedSurface->h;
-                printf("Created texture [%s] with dimensions: [%ix%i]\n", path.c_str(), width, height);
 			}
 			SDL_FreeSurface(loadedSurface);
 		}
@@ -74,7 +73,7 @@ public:
 
 		SDL_Rect renderQuad = { x, y, width, height};
 		int code = SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
-        if (log && code < 0) {
+        if (code < 0) {
             printf("Error rendering Texture [%s]. Got Error code: [%i]\n", name.c_str(), code);
         } else if (log) {
             printf("Rendering [%s]\n", name.c_str());

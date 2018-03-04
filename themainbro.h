@@ -11,6 +11,13 @@
 
 using namespace std;
 
+typedef struct keys_pressed {
+    bool left;
+    bool right;
+    bool up;
+    bool down;
+} keys_pressed;
+
 class themainbro : collision {
 private:
     SDL_Rect box;
@@ -24,10 +31,11 @@ private:
     bool moving;
     int health;
     const double speed;
+    keys_pressed keys;
 public:
     /*set the width and height of the rect*/
     themainbro(int w = 50, int h = 100) :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(),
+        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(), keys(),
         direction('r'), frame(0.0), moving(), health(10), speed(300)
     {
         box.y = 480 - h;
@@ -66,11 +74,13 @@ public:
             case SDLK_DOWN: yvel += speed; break;
             case SDLK_LEFT:
                     xvel -= speed;
-                    direction = 'l';
+                    if (!keys.right) direction = 'l';
+                    keys.left = true;
                     break;
             case SDLK_RIGHT:
                     xvel += speed;
-                    direction = 'r';
+                    if (!keys.left) direction = 'r';
+                    keys.right = true;
                     break;
             }
         }
@@ -81,11 +91,13 @@ public:
             case SDLK_DOWN: yvel -= speed; break;
             case SDLK_LEFT:
                     xvel += speed;
-                    direction = 'l';
+                    keys.left = false;
+                    if (keys.right) direction = 'r';
                     break;
             case SDLK_RIGHT:
                     xvel -= speed;
-                    direction = 'r';
+                    keys.right = false;
+                    if (keys.left) direction = 'l';
                     break;
             }
         }
