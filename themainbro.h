@@ -7,8 +7,6 @@
 #include "Wrapper.h"
 #include "collision.h"
 
-#include <iostream>
-
 using namespace std;
 
 typedef struct keys_pressed {
@@ -32,11 +30,12 @@ private:
     int health;
     const double speed;
     keys_pressed keys;
+    unsigned int currAnimationIndex;
 public:
     /*set the width and height of the rect*/
     themainbro(int w = 50, int h = 100) :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(), keys(),
-        direction('r'), frame(0.0), moving(), health(10), speed(300)
+        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(),
+        direction('r'), frame(0.0), moving(), health(10), speed(300), keys(), currAnimationIndex()
     {
         box.y = 480 - h;
         box.x = 0;
@@ -70,8 +69,8 @@ public:
         if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
         {
             switch (e.key.keysym.sym) {
-            case SDLK_UP: yvel -= speed; break;
-            case SDLK_DOWN: yvel += speed; break;
+            //case SDLK_UP: yvel -= speed; break;
+            //case SDLK_DOWN: yvel += speed; break;
             case SDLK_LEFT:
                     xvel -= speed;
                     if (!keys.right) direction = 'l';
@@ -87,17 +86,17 @@ public:
         else if (e.type == SDL_KEYUP && e.key.repeat == 0)
         {
             switch (e.key.keysym.sym) {
-            case SDLK_UP: yvel += speed; break;
-            case SDLK_DOWN: yvel -= speed; break;
+            //case SDLK_UP: yvel += speed; break;
+            //case SDLK_DOWN: yvel -= speed; break;
             case SDLK_LEFT:
                     xvel += speed;
-                    keys.left = false;
                     if (keys.right) direction = 'r';
+                    keys.left = false;
                     break;
             case SDLK_RIGHT:
                     xvel -= speed;
-                    keys.right = false;
                     if (keys.left) direction = 'l';
+                    keys.right = false;
                     break;
             }
         }
@@ -122,13 +121,15 @@ public:
         }
     }
 
-    void show(SDL_Renderer*& renderer, const int& dir = DEFAULT) {
-        //printf("Showing [%s] with dimensions: [%ix%i] and box dimensions of :[ixi]\n", imgs[0].getName().c_str(), imgs[0].getWidth(), imgs[0].getHeight());
+    void show(SDL_Renderer*& renderer, const float timeStep) {
+        if ((timeStep * speed) > 1)
+            currAnimationIndex = (currAnimationIndex + 1) % rightImgs.size();
+
         if (direction == 'r') {
-            rightImgs[0]->render((int)xpos, (int)ypos, renderer);
+            rightImgs[currAnimationIndex]->render((int)xpos, (int)ypos, renderer);
         }
         else {
-            leftImgs[0]->render((int)xpos, (int)ypos, renderer);
+            leftImgs[currAnimationIndex]->render((int)xpos, (int)ypos, renderer);
         }
     }
 
