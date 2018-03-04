@@ -16,6 +16,16 @@ typedef struct keys_pressed {
     bool down;
 } keys_pressed;
 
+typedef struct jump_vals {
+    bool jumping;
+    bool grounded;
+    unsigned jump_height;
+    double prev_jump_height;
+    unsigned max_jump_duration;
+    double jump_duration;
+    double jump_start;
+} jump_vals;
+
 class themainbro : collision {
 private:
     SDL_Rect box;
@@ -23,26 +33,34 @@ private:
     float xpos, ypos;
     vector<Wrapper*> rightImgs;
     vector<Wrapper*> leftImgs;
-    bool ground, jump;
     char direction;
-    double frame;
-    bool moving;
     int health;
     const double speed;
     keys_pressed keys;
-    unsigned int currAnimationIndex;
+    jump_vals jmp_ctrl;
+    unsigned int frame;
+    unsigned int totalFrames;
 public:
     /*set the width and height of the rect*/
-    themainbro(int w = 50, int h = 100) :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(), ground(), jump(),
-        direction('r'), frame(0.0), moving(), health(10), speed(300), keys(), currAnimationIndex()
+    themainbro() :
+        rightImgs(), leftImgs(), box(), xvel(), yvel(),
+        direction('r'), health(10), speed(300), keys(), frame(), totalFrames(), jmp_ctrl()
     {
-        box.y = 480 - h;
+        jmp_ctrl.jumping = false;
+        jmp_ctrl.grounded = true;
+        jmp_ctrl.jump_height = 100;
+        jmp_ctrl.max_jump_duration = 500;
+        jmp_ctrl.jump_duration = 0;
+        jmp_ctrl.prev_jump_height = 0;
+        jmp_ctrl.jump_start = 0;
+
+        box.y = 480 - 77;
         box.x = 0;
+        box.w = 0;
+        box.h = 0;
+
         ypos = box.y;
         xpos = box.x;
-        box.w = w;
-        box.h = h;
     }
 
     ~themainbro() {
@@ -81,6 +99,9 @@ public:
                     if (!keys.left) direction = 'r';
                     keys.right = true;
                     break;
+            case SDLK_SPACE:
+                    set_jump();
+                    break;
             }
         }
         else if (e.type == SDL_KEYUP && e.key.repeat == 0)
@@ -102,7 +123,7 @@ public:
         }
     }
 
-    void move(const int& state, const float timeStep) {
+    void move(const float timeStep) {
         xpos += xvel * timeStep;
         box.x = (int)xpos;
         if (box.x < 0) {
@@ -111,7 +132,8 @@ public:
         if (box.x + box.w > 640) {
             xpos = 640 - box.w;
         }
-        ypos += yvel * timeStep;
+        handle_jump(timeStep);
+        ypos += yvel;
         box.y = (int)ypos;
         if (box.y < 0) {
             ypos = 0;
@@ -121,29 +143,75 @@ public:
         }
     }
 
-    void show(SDL_Renderer*& renderer, const float timeStep) {
-        if ((timeStep * speed) > 1)
-            currAnimationIndex = (currAnimationIndex + 1) % rightImgs.size();
+    void show(SDL_Renderer*& renderer) {
+        frame++;
+        unsigned interval = 800;
+        if (frame / interval >= totalFrames)
+            frame = 0;
+
+        unsigned i = keys.right || keys.left ? frame / interval : 0;
 
         if (direction == 'r') {
-            rightImgs[currAnimationIndex]->render((int)xpos, (int)ypos, renderer);
+            if (rightImgs[i]->getWidth() != box.w)
+                box.w = rightImgs[i]->getWidth();
+            rightImgs[i]->render((int)xpos, (int)ypos, renderer);
         }
         else {
-            leftImgs[currAnimationIndex]->render((int)xpos, (int)ypos, renderer);
+            if (leftImgs[i]->getWidth() != box.w)
+                box.w = leftImgs[i]->getWidth();
+            leftImgs[i]->render((int)xpos, (int)ypos, renderer);
         }
     }
 
-    void setJump() {
-        if (ground && !jump) {
-            jump = true;
-            ground = false;
-            yvel = -17; // the starting jump value
-            box.y -= 5;
+    void set_jump() {
+        if (jmp_ctrl.grounded && !jmp_ctrl.jumping) {
+            jmp_ctrl.jumping = true;
+            jmp_ctrl.grounded = false;
+            jmp_ctrl.jump_start = box.y;
         }
     }
 
-    void setMoving(bool b) {
-        moving = b;
+    void jump_reset() {
+        jmp_ctrl.jumping = false;
+        jmp_ctrl.grounded = true;
+        jmp_ctrl.jump_height = 100;
+        jmp_ctrl.max_jump_duration = 500;
+        jmp_ctrl.jump_duration = 0;
+        jmp_ctrl.prev_jump_height = 0;
+        jmp_ctrl.jump_start = 0;
+    }
+
+    double calc_vertical_location_in_jump(float milliseconds) {
+        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
+            // negative means increase
+            jmp_ctrl.jump_duration += milliseconds;
+            if (jmp_ctrl.jump_duration >= jmp_ctrl.max_jump_duration) {
+                // the time of the jump is over, they should stop jumping
+                jump_reset();
+                return 0.0;
+            }
+            double height_at_time = .0032 * jmp_ctrl.jump_duration - .8; 
+            double height = height_at_time - jmp_ctrl.prev_jump_height;
+            jmp_ctrl.prev_jump_height = height;
+            return height;
+        }
+        else {
+            printf("Shouldn't get here.\n");
+            return 0.0;
+        }
+    }
+
+    // timeStep is the number of seconds that have passed since
+    // the last frame
+    void handle_jump(float timeStep) {
+        // convert back to milliseconds
+        timeStep *= 1000;
+        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
+            yvel = calc_vertical_location_in_jump(timeStep);
+        } else {
+            jump_reset();
+            //yvel = 0;
+        }
     }
 
     void setDirection(char c) {
@@ -167,6 +235,7 @@ public:
         temp->loadFromFile(filename, renderer);
 
         if (dir == 'r') {
+            totalFrames++;
             rightImgs.push_back(temp);
         }
         else {

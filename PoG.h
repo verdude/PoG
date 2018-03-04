@@ -38,7 +38,7 @@ private:
 			if (window == NULL) {
 				success = false;
 			} else {
-				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 				if (renderer == NULL) {
 					success = false;
 				} else {
@@ -75,34 +75,9 @@ private:
         delete background;
 	}
 
-	int getKeyStates() {
-		//themainbro curr = NULL;
-		const Uint8* currState = SDL_GetKeyboardState(NULL);
-		if (currState[SDL_SCANCODE_UP])
-		{
-			return DEFAULT;
-		}
-		else if (currState[SDL_SCANCODE_DOWN])
-		{
-			return DEFAULT;
-		}
-		else if (currState[SDL_SCANCODE_LEFT])
-		{
-			return DEFAULT;
-		}
-		else if (currState[SDL_SCANCODE_RIGHT])
-		{
-			return DEFAULT;
-		}
-		else
-		{
-			return DEFAULT;
-		}
-	}
-
 public:
 
-	PoG() : cherub(80, 80) {
+	PoG() : cherub() {
 		screen = SDL_GetWindowSurface(window);
 		camera.x = camera.y = 0;
         background = new Wrapper();
@@ -121,7 +96,6 @@ public:
 		}
 		bool quit = false;
 		SDL_Event e;
-		int state = 0;
 		// Timer to regulate movement of the main character
 		Timer cherubTimer;
 
@@ -136,18 +110,16 @@ public:
 			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			double timeStep = cherubTimer.getTicks() / 1000.f;
 
-			cherub.move(state, timeStep);
+			cherub.move(timeStep);
 			
 			cherubTimer.start();
 
 			SDL_RenderClear(renderer);
 			
 			background->render(0, 0, renderer, false);
-			cherub.show(renderer, timeStep);
+			cherub.show(renderer);
 			
 			SDL_RenderPresent(renderer);
-			
-			state = getKeyStates();
 		}
 	}
 };
