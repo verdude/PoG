@@ -19,11 +19,11 @@ typedef struct keys_pressed {
 typedef struct jump_vals {
     bool jumping;
     bool grounded;
-    unsigned jump_height;
     double prev_jump_height;
-    unsigned max_jump_duration;
-    double jump_duration;
     double jump_start;
+    double jump_duration;
+    double slope;
+    double y_intercept;
 } jump_vals;
 
 class themainbro : collision {
@@ -37,22 +37,46 @@ private:
     int health;
     const double speed;
     keys_pressed keys;
-    jump_vals jmp_ctrl;
     unsigned int frame;
     unsigned int totalFrames;
-public:
-    /*set the width and height of the rect*/
-    themainbro() :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(),
-        direction('r'), health(10), speed(300), keys(), frame(), totalFrames(), jmp_ctrl()
-    {
+    jump_vals jmp_ctrl;
+    unsigned max_jump_duration;
+    unsigned jump_height;
+
+    /**
+     * y = a(x-z1)(x-z2)
+     * z1 and z2 are the zeroes of the parabola
+     */
+    void calc_jump_function_derivative(double z1, double z2, double x, double y) {
+        double a = y / ((x - z1) * (x - z2));
+        double y_intercept = ((0 - z2) * a) - a;
+        double slope = a * 2;
+        jmp_ctrl.slope = slope;
+        jmp_ctrl.y_intercept = y_intercept;
+        printf("z1: %f, z2: %f x: %f y: %f\n", z1, z2, x, y);
+        printf("a: %f, slope: %f yintercept: %f\n", a, slope, y_intercept);
+    }
+
+    void jump_reset() {
         jmp_ctrl.jumping = false;
         jmp_ctrl.grounded = true;
-        jmp_ctrl.jump_height = 100;
-        jmp_ctrl.max_jump_duration = 500;
         jmp_ctrl.jump_duration = 0;
         jmp_ctrl.prev_jump_height = 0;
         jmp_ctrl.jump_start = 0;
+    }
+
+public:
+    /*set the width and height of the rect*/
+    themainbro(double start = 100, double jump_duration = 600, double jump_height = -200) :
+        rightImgs(), leftImgs(), box(), xvel(), yvel(),
+        direction('r'), health(10), speed(300), keys(), frame(), totalFrames(), jmp_ctrl(), jump_height(jump_height),
+        max_jump_duration(jump_duration)
+    {
+        jump_reset();
+
+        double midpoint = ((jump_duration - start)/2) + start;
+
+        calc_jump_function_derivative(start, jump_duration, midpoint, jump_height);
 
         box.y = 480 - 77;
         box.x = 0;
@@ -171,32 +195,24 @@ public:
         }
     }
 
-    void jump_reset() {
-        jmp_ctrl.jumping = false;
-        jmp_ctrl.grounded = true;
-        jmp_ctrl.jump_height = 100;
-        jmp_ctrl.max_jump_duration = 500;
-        jmp_ctrl.jump_duration = 0;
-        jmp_ctrl.prev_jump_height = 0;
-        jmp_ctrl.jump_start = 0;
-    }
-
     double calc_vertical_location_in_jump(float milliseconds) {
         if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
             // negative means increase
             jmp_ctrl.jump_duration += milliseconds;
-            if (jmp_ctrl.jump_duration >= jmp_ctrl.max_jump_duration) {
+            if (jmp_ctrl.jump_duration >= max_jump_duration) {
                 // the time of the jump is over, they should stop jumping
                 jump_reset();
                 return 0.0;
             }
-            double height_at_time = .0032 * jmp_ctrl.jump_duration - .8; 
+            double height_at_time = jmp_ctrl.slope * jmp_ctrl.jump_duration - jmp_ctrl.y_intercept; 
             double height = height_at_time - jmp_ctrl.prev_jump_height;
+            printf("height: %f\n", height);
             jmp_ctrl.prev_jump_height = height;
             return height;
         }
         else {
             printf("Shouldn't get here.\n");
+            jump_reset();
             return 0.0;
         }
     }
