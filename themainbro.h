@@ -19,11 +19,11 @@ typedef struct keys_pressed {
 typedef struct jump_vals {
     bool jumping;
     bool grounded;
-    double prev_jump_height;
     double jump_start;
-    double jump_duration;
-    double slope;
-    double y_intercept;
+    double jump_time;
+    double function_coefficient;
+    double zero_1;
+    double zero_2;
 } jump_vals;
 
 class themainbro : collision {
@@ -47,36 +47,75 @@ private:
      * y = a(x-z1)(x-z2)
      * z1 and z2 are the zeroes of the parabola
      */
-    void calc_jump_function_derivative(double z1, double z2, double x, double y) {
-        double a = y / ((x - z1) * (x - z2));
-        double y_intercept = ((0 - z2) * a) - a;
-        double slope = a * 2;
-        jmp_ctrl.slope = slope;
-        jmp_ctrl.y_intercept = y_intercept;
+    void calc_jump_function_coefficient(double z1, double z2, double x, double y) {
+        jmp_ctrl.function_coefficient = y / ((x - z1) * (x - z2));
+
         printf("z1: %f, z2: %f x: %f y: %f\n", z1, z2, x, y);
-        printf("a: %f, slope: %f yintercept: %f\n", a, slope, y_intercept);
+        printf("a: %f\n", jmp_ctrl.function_coefficient);
     }
 
     void jump_reset() {
         jmp_ctrl.jumping = false;
         jmp_ctrl.grounded = true;
-        jmp_ctrl.jump_duration = 0;
-        jmp_ctrl.prev_jump_height = 0;
+        jmp_ctrl.jump_time = 0;
         jmp_ctrl.jump_start = 0;
+    }
+
+    void set_jump() {
+        if (jmp_ctrl.grounded && !jmp_ctrl.jumping) {
+            jmp_ctrl.jumping = true;
+            jmp_ctrl.grounded = false;
+            jmp_ctrl.jump_start = box.y;
+        }
+    }
+
+    double calc_vertical_location_in_jump(float milliseconds) {
+        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
+            // negative means increase
+            jmp_ctrl.jump_time += milliseconds;
+            if (jmp_ctrl.jump_time >= max_jump_duration) {
+                // the time of the jump is over, they should stop jumping
+                jump_reset();
+                return jmp_ctrl.jump_start;
+            }
+            double ypos = jmp_ctrl.function_coefficient * (jmp_ctrl.jump_time - jmp_ctrl.zero_1) * (jmp_ctrl.jump_time - jmp_ctrl.zero_2);
+            double height = jmp_ctrl.jump_start + ypos;
+            printf("height: %f\n", height);
+            return height;
+        }
+        else {
+            printf("Shouldn't get here.\n");
+            jump_reset();
+            return jmp_ctrl.jump_start;
+        }
+    }
+
+    // timeStep is the number of seconds that have passed since
+    // the last frame
+    double handle_jump(float timeStep) {
+        // convert back to milliseconds
+        timeStep *= 1000;
+        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
+            return jmp_ctrl.jump_start + calc_vertical_location_in_jump(timeStep);
+        } else {
+            jump_reset();
+            return jmp_ctrl.jump_start;
+        }
     }
 
 public:
     /*set the width and height of the rect*/
-    themainbro(double start = 100, double jump_duration = 600, double jump_height = -200) :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(),
-        direction('r'), health(10), speed(300), keys(), frame(), totalFrames(), jmp_ctrl(), jump_height(jump_height),
-        max_jump_duration(jump_duration)
+    themainbro(double start = 0, double jump_duration = 500, double jump_height = -100) :
+        rightImgs(), leftImgs(), box(), xvel(), yvel(), direction('r'), health(10), speed(300),
+        keys(), frame(), totalFrames(), jmp_ctrl(), jump_height(jump_height), max_jump_duration(jump_duration)
     {
+        jmp_ctrl.zero_1 = start;
+        jmp_ctrl.zero_2 = jump_duration;
         jump_reset();
 
-        double midpoint = ((jump_duration - start)/2) + start;
+        double jump_midpoint = ((jump_duration - start)/2) + start;
 
-        calc_jump_function_derivative(start, jump_duration, midpoint, jump_height);
+        calc_jump_function_coefficient(start, jump_duration, jump_midpoint, jump_height);
 
         box.y = 480 - 77;
         box.x = 0;
@@ -156,8 +195,7 @@ public:
         if (box.x + box.w > 640) {
             xpos = 640 - box.w;
         }
-        handle_jump(timeStep);
-        ypos += yvel;
+        ypos = handle_jump(timeStep);
         box.y = (int)ypos;
         if (box.y < 0) {
             ypos = 0;
@@ -184,49 +222,6 @@ public:
             box.w = leftImgs[i]->getWidth();
             box.h = leftImgs[i]->getHeight();
             leftImgs[i]->render((int)xpos, (int)ypos, renderer);
-        }
-    }
-
-    void set_jump() {
-        if (jmp_ctrl.grounded && !jmp_ctrl.jumping) {
-            jmp_ctrl.jumping = true;
-            jmp_ctrl.grounded = false;
-            jmp_ctrl.jump_start = box.y;
-        }
-    }
-
-    double calc_vertical_location_in_jump(float milliseconds) {
-        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
-            // negative means increase
-            jmp_ctrl.jump_duration += milliseconds;
-            if (jmp_ctrl.jump_duration >= max_jump_duration) {
-                // the time of the jump is over, they should stop jumping
-                jump_reset();
-                return 0.0;
-            }
-            double height_at_time = jmp_ctrl.slope * jmp_ctrl.jump_duration - jmp_ctrl.y_intercept; 
-            double height = height_at_time - jmp_ctrl.prev_jump_height;
-            printf("height: %f\n", height);
-            jmp_ctrl.prev_jump_height = height;
-            return height;
-        }
-        else {
-            printf("Shouldn't get here.\n");
-            jump_reset();
-            return 0.0;
-        }
-    }
-
-    // timeStep is the number of seconds that have passed since
-    // the last frame
-    void handle_jump(float timeStep) {
-        // convert back to milliseconds
-        timeStep *= 1000;
-        if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
-            yvel = calc_vertical_location_in_jump(timeStep);
-        } else {
-            jump_reset();
-            //yvel = 0;
         }
     }
 
