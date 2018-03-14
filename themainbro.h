@@ -19,11 +19,11 @@ typedef struct keys_pressed {
 typedef struct jump_vals {
     bool jumping;
     bool grounded;
-    double jump_start;
-    double jump_time;
-    double function_coefficient;
-    double zero_1;
-    double zero_2;
+    float jump_start;
+    float jump_time;
+    float function_coefficient;
+    float zero_1;
+    float zero_2;
 } jump_vals;
 
 class themainbro : collision {
@@ -35,7 +35,7 @@ private:
     vector<Wrapper*> leftImgs;
     char direction;
     int health;
-    const double speed;
+    const float speed;
     keys_pressed keys;
     unsigned int frame;
     unsigned int totalFrames;
@@ -47,29 +47,29 @@ private:
      * y = a(x-z1)(x-z2)
      * z1 and z2 are the zeroes of the parabola
      */
-    void calc_jump_function_coefficient(double z1, double z2, double x, double y) {
+    void calc_jump_function_coefficient(float z1, float z2, float x, float y) {
         jmp_ctrl.function_coefficient = y / ((x - z1) * (x - z2));
 
-        printf("z1: %f, z2: %f x: %f y: %f\n", z1, z2, x, y);
-        printf("a: %f\n", jmp_ctrl.function_coefficient);
+        printf("Jump Values      -> z1: %f, z2: %f x: %f y: %f\n", z1, z2, x, y);
+        printf("Jump Coefficient -> a: %f\n", jmp_ctrl.function_coefficient);
     }
 
     void jump_reset() {
         jmp_ctrl.jumping = false;
         jmp_ctrl.grounded = true;
         jmp_ctrl.jump_time = 0;
-        jmp_ctrl.jump_start = 0;
+        jmp_ctrl.jump_start = (int)ypos;
     }
 
     void set_jump() {
         if (jmp_ctrl.grounded && !jmp_ctrl.jumping) {
             jmp_ctrl.jumping = true;
             jmp_ctrl.grounded = false;
-            jmp_ctrl.jump_start = box.y;
+            jmp_ctrl.jump_start = ypos;
         }
     }
 
-    double calc_vertical_location_in_jump(float milliseconds) {
+    float calc_vertical_location_in_jump(float milliseconds) {
         if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
             // negative means increase
             jmp_ctrl.jump_time += milliseconds;
@@ -78,9 +78,8 @@ private:
                 jump_reset();
                 return jmp_ctrl.jump_start;
             }
-            double ypos = jmp_ctrl.function_coefficient * (jmp_ctrl.jump_time - jmp_ctrl.zero_1) * (jmp_ctrl.jump_time - jmp_ctrl.zero_2);
-            double height = jmp_ctrl.jump_start + ypos;
-            printf("height: %f\n", height);
+            float vertical_pos = jmp_ctrl.function_coefficient * (jmp_ctrl.jump_time - jmp_ctrl.zero_1) * (jmp_ctrl.jump_time - jmp_ctrl.zero_2);
+            float height = jmp_ctrl.jump_start + vertical_pos;
             return height;
         }
         else {
@@ -92,20 +91,19 @@ private:
 
     // timeStep is the number of seconds that have passed since
     // the last frame
-    double handle_jump(float timeStep) {
-        // convert back to milliseconds
-        timeStep *= 1000;
+    float handle_jump(float timeStep) {
         if (jmp_ctrl.jumping && !jmp_ctrl.grounded) {
-            return jmp_ctrl.jump_start + calc_vertical_location_in_jump(timeStep);
+            // convert back to milliseconds
+            timeStep *= 1000;
+            return calc_vertical_location_in_jump(timeStep);
         } else {
-            jump_reset();
-            return jmp_ctrl.jump_start;
+            return ypos;
         }
     }
 
 public:
     /*set the width and height of the rect*/
-    themainbro(double start = 0, double jump_duration = 500, double jump_height = -100) :
+    themainbro(float start = 0, float jump_duration = 500, float jump_height = -100) :
         rightImgs(), leftImgs(), box(), xvel(), yvel(), direction('r'), health(10), speed(300),
         keys(), frame(), totalFrames(), jmp_ctrl(), jump_height(jump_height), max_jump_duration(jump_duration)
     {
@@ -113,17 +111,17 @@ public:
         jmp_ctrl.zero_2 = jump_duration;
         jump_reset();
 
-        double jump_midpoint = ((jump_duration - start)/2) + start;
+        float jump_midpoint = ((jump_duration - start)/2) + start;
 
         calc_jump_function_coefficient(start, jump_duration, jump_midpoint, jump_height);
 
         box.y = 480 - 77;
         box.x = 0;
         box.w = 0;
-        box.h = 0;
+        box.h = 77;
 
-        ypos = box.y;
-        xpos = box.x;
+        ypos = (float)box.y;
+        xpos = (float)box.x;
     }
 
     ~themainbro() {
@@ -190,26 +188,27 @@ public:
         xpos += xvel * timeStep;
         box.x = (int)xpos;
         if (box.x < 0) {
-            xpos = 0;
+            box.x = xpos = 0;
         }
         if (box.x + box.w > 640) {
-            xpos = 640 - box.w;
+            box.x = xpos = 640 - box.w;
         }
         ypos = handle_jump(timeStep);
         box.y = (int)ypos;
         if (box.y < 0) {
-            ypos = 0;
+            box.y = ypos = 0;
         }
         if (box.y + box.h > 480) {
-            ypos = 480 - box.h;
+            box.y = ypos = 480 - box.h;
         }
     }
 
     void show(SDL_Renderer*& renderer) {
         frame++;
-        unsigned interval = 800;
-        if (frame / interval >= totalFrames)
+        unsigned interval = 16;
+        if (frame / interval >= totalFrames) {
             frame = 0;
+        }
 
         unsigned i = keys.right || keys.left ? frame / interval : 0;
 
