@@ -1,10 +1,9 @@
 # PoG
-###### ===
-###### Protector of the Garden
-###### Sidescroller
-###### =======
+### Protector of the Garden
+#### Sidescroller
 
 ###### Development Dependencies
+```bash
 #!/bin/bash
 
 if [[ $(uname) = "Darwin" ]] && [[ -n $(which brew) ]]; then
@@ -17,9 +16,7 @@ elif [[ -n $(which apt) ]]; then
         libsdl2-dev             \
         libsdl2-image-dev       \
         libsdl2-ttf-dev
-
 else
     echo Install failed.
-
 fi
-
+```
