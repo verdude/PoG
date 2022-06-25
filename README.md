@@ -10,7 +10,6 @@ if [[ $(uname) = "Darwin" ]] && [[ -n $(which brew) ]]; then
         brew install sdl2
         brew install sdl2_image
         brew install sdl2_ttf
-
 elif [[ -n $(which apt) ]]; then
     sudo apt install            \
         libsdl2-dev             \
