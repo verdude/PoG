@@ -7,7 +7,7 @@
 using namespace std;
 
 /*
-	Used as a wrapper for textures. This makes it easy to... do... something...
+    Used as a wrapper for textures. This makes it easy to... do... something...
 */
 
 class Wrapper {
@@ -15,36 +15,37 @@ private:
 	SDL_Texture* texture;
 	int width;
 	int height;
-    string name;
+	string name;
+
 public:
-	Wrapper(SDL_Texture* temp = NULL) : 
-		texture(temp), width(), height() {}
+	Wrapper(SDL_Texture* temp = NULL) : texture(temp), width(), height() {}
 	~Wrapper() {
 		free();
 	}
 
 	bool loadFromFile(string path, SDL_Renderer*& renderer) {
-        // creates a hardware optimized texture and saves it in the private texture field
+		// creates a hardware optimized texture and saves it in the private texture field
 		free();
-        name = path;
+		name = path;
 		SDL_Texture* newTexture = NULL;
 		SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 		if (loadedSurface == NULL) {
 			printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), SDL_GetError());
-		}
-		else {
-            //printf("The image address: %p", loadedSurface);
-			if (!SDL_SetSurfaceColorKey(loadedSurface, true, SDL_MapSurfaceRGB(loadedSurface, 0, 0xFF, 0xFF))) {
-                printf("Unable to set color key for %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-                SDL_DestroySurface(loadedSurface);
-                return false;
-            }
+		} else {
+			// printf("The image address: %p", loadedSurface);
+			if (!SDL_SetSurfaceColorKey(loadedSurface, true,
+			                            SDL_MapSurfaceRGB(loadedSurface, 0, 0xFF, 0xFF))) {
+				printf("Unable to set color key for %s! SDL Error: %s\n", path.c_str(),
+				       SDL_GetError());
+				SDL_DestroySurface(loadedSurface);
+				return false;
+			}
 
 			newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 			if (newTexture == NULL) {
-				printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-			}
-			else {
+				printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(),
+				       SDL_GetError());
+			} else {
 				SDL_SetTextureScaleMode(newTexture, SDL_SCALEMODE_LINEAR);
 				width = loadedSurface->w;
 				height = loadedSurface->h;
@@ -56,8 +57,7 @@ public:
 	}
 
 	void free() {
-		if (texture != NULL)
-		{
+		if (texture != NULL) {
 			SDL_DestroyTexture(texture);
 			texture = NULL;
 			width = 0;
@@ -65,24 +65,20 @@ public:
 		}
 	}
 
-	void setColor(Uint8 red, Uint8 green, Uint8 blue) {
+	void setColor(Uint8 red, Uint8 green, Uint8 blue) {}
 
-	}
+	void setAlpha(Uint8 alpha) {}
 
-	void setAlpha(Uint8 alpha) {
+	void render(int x, int y, SDL_Renderer*& renderer, bool log = false, SDL_Rect* clip = NULL,
+	            double angle = 0.0, SDL_Point* center = NULL, SDL_FlipMode flip = SDL_FLIP_NONE) {
 
-	}
-
-	void render(int x, int y, SDL_Renderer*& renderer, bool log = false, SDL_Rect* clip = NULL, 
-		double angle = 0.0, SDL_Point* center = NULL, SDL_FlipMode flip = SDL_FLIP_NONE) {
-
-		SDL_FRect renderQuad = { static_cast<float>(x), static_cast<float>(y),
-            static_cast<float>(width), static_cast<float>(height) };
-        if (!SDL_RenderTexture(renderer, texture, NULL, &renderQuad)) {
-            printf("Error rendering texture [%s]: %s\n", name.c_str(), SDL_GetError());
-        } else if (log) {
-            printf("Rendering [%s]\n", name.c_str());
-        }
+		SDL_FRect renderQuad = {static_cast<float>(x), static_cast<float>(y),
+		                        static_cast<float>(width), static_cast<float>(height)};
+		if (!SDL_RenderTexture(renderer, texture, NULL, &renderQuad)) {
+			printf("Error rendering texture [%s]: %s\n", name.c_str(), SDL_GetError());
+		} else if (log) {
+			printf("Rendering [%s]\n", name.c_str());
+		}
 	}
 
 	int getHeight() {
@@ -93,16 +89,15 @@ public:
 		return width;
 	}
 
-    string getName() {
-        return name;
-    }
+	string getName() {
+		return name;
+	}
 
 	SDL_Texture* getTexture() {
 		return texture;
 	}
 
-    void printAddress() {
-        printf("Texture Address for [%s] : [%p]\n", name.c_str(), texture);
-    }
-
+	void printAddress() {
+		printf("Texture Address for [%s] : [%p]\n", name.c_str(), texture);
+	}
 };

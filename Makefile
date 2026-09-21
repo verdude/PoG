@@ -1,11 +1,13 @@
 CXX ?= g++
 PKG_CONFIG ?= pkg-config
+CLANG_FORMAT ?= clang-format
+FORMAT_FILES = $(wildcard *.cpp *.h)
 CXXFLAGS ?= -std=c++11
 SDL_PACKAGES = sdl3 sdl3-image
 SDL_CFLAGS = $(shell $(PKG_CONFIG) --cflags $(SDL_PACKAGES))
 SDL_LIBS = $(shell $(PKG_CONFIG) --libs $(SDL_PACKAGES))
 
-.PHONY: all make clean check-deps
+.PHONY: all make clean check-deps format format-check
 all: build
 make: build
 
@@ -17,6 +19,12 @@ check-deps:
 
 build: $(wildcard *.cpp *.h) Makefile | check-deps
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(SDL_CFLAGS) -o $@ $(wildcard *.cpp) $(LDFLAGS) $(SDL_LIBS) $(LDLIBS)
+
+format:
+	$(CLANG_FORMAT) --style=file -i $(FORMAT_FILES)
+
+format-check:
+	$(CLANG_FORMAT) --style=file --dry-run --Werror $(FORMAT_FILES)
 
 clean:
 	rm -f build

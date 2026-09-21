@@ -33,3 +33,12 @@ make
 
 Use the left/right arrow keys to move and Space to jump. Close the window to quit.
 Run `make clean` to remove the executable.
+
+Install `clang-format` to format the C++ sources and headers using `.clang-format`:
+
+```bash
+make format
+make format-check # Check formatting without changing files
+```
+
+To select a specific executable, use `make format CLANG_FORMAT=clang-format-22`.

@@ -15,7 +15,7 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	// matrix of the blocks
-	vector<vector<int> > map;
+	vector<vector<int>> map;
 
 	Wrapper* background;
 	themainbro cherub;
@@ -47,15 +47,13 @@ private:
 
 	bool loadImages() {
 		return cherub.addSprite("chars/neutralright.png", renderer, 'r') &&
-			cherub.addSprite("chars/walk1right.png", renderer, 'r') &&
-			cherub.addSprite("chars/neutralleft.png", renderer, 'l') &&
-			cherub.addSprite("chars/walk1left.png", renderer, 'l') &&
-			background->loadFromFile("backdrops/cornfield.png", renderer);
+		       cherub.addSprite("chars/walk1right.png", renderer, 'r') &&
+		       cherub.addSprite("chars/neutralleft.png", renderer, 'l') &&
+		       cherub.addSprite("chars/walk1left.png", renderer, 'l') &&
+		       background->loadFromFile("backdrops/cornfield.png", renderer);
 	}
 
-	void handEvents() {
-
-	}
+	void handEvents() {}
 
 	void terminate() {
 		cherub.clearSprites();
@@ -69,7 +67,6 @@ private:
 	}
 
 public:
-
 	PoG() : camera(), window(NULL), renderer(NULL), background(new Wrapper()), cherub() {}
 
 	~PoG() {
@@ -95,18 +92,18 @@ public:
 				cherub.handle_input(e);
 			}
 
-			//SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			// SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			double timeStep = cherubTimer.getTicks() / 1000.f;
 
 			cherub.move(timeStep);
-			
+
 			cherubTimer.start();
 
 			SDL_RenderClear(renderer);
-			
+
 			background->render(0, 0, renderer, false);
 			cherub.show(renderer);
-			
+
 			SDL_RenderPresent(renderer);
 		}
 		return true;

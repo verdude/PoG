@@ -12,6 +12,7 @@ private:
 	Uint64 pausedTicks;
 	bool paused;
 	bool started;
+
 public:
 	Timer() : startTicks(), pausedTicks(), paused(false), started(false) {}
 
@@ -50,8 +51,7 @@ public:
 		if (started) {
 			if (paused) {
 				time = pausedTicks;
-			}
-			else {
+			} else {
 				time = SDL_GetTicks() - startTicks;
 			}
 		}
