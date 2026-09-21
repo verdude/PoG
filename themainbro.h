@@ -1,8 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
 
 #include "Wrapper.h"
 #include "collision.h"
@@ -104,8 +103,8 @@ private:
 public:
     /*set the width and height of the rect*/
     themainbro(float start = 0, float jump_duration = 500, float jump_height = -100) :
-        rightImgs(), leftImgs(), box(), xvel(), yvel(), direction('r'), health(10), speed(300),
-        keys(), frame(), totalFrames(), jmp_ctrl(), jump_height(jump_height), max_jump_duration(jump_duration)
+        box(), xvel(), yvel(), xpos(), ypos(), rightImgs(), leftImgs(), direction('r'), health(10), speed(300),
+        keys(), frame(), totalFrames(), jmp_ctrl(), max_jump_duration(jump_duration), jump_height(jump_height)
     {
         jmp_ctrl.zero_1 = start;
         jmp_ctrl.zero_2 = jump_duration;
@@ -125,11 +124,19 @@ public:
     }
 
     ~themainbro() {
-        for (int i = 0; i < rightImgs.size(); i++)
+        clearSprites();
+    }
+
+    void clearSprites() {
+        for (size_t i = 0; i < rightImgs.size(); i++)
             delete rightImgs[i];
 
-        for (int i = 0; i < leftImgs.size(); i++)
+        for (size_t i = 0; i < leftImgs.size(); i++)
             delete leftImgs[i];
+
+        rightImgs.clear();
+        leftImgs.clear();
+        totalFrames = 0;
     }
 
     SDL_Rect* getRect() {
@@ -145,9 +152,9 @@ public:
     }
 
     void handle_input(SDL_Event e) {
-        if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
+        if (e.type == SDL_EVENT_KEY_DOWN && e.key.repeat == 0)
         {
-            switch (e.key.keysym.sym) {
+            switch (e.key.key) {
             //case SDLK_UP: yvel -= speed; break;
             //case SDLK_DOWN: yvel += speed; break;
             case SDLK_LEFT:
@@ -165,9 +172,9 @@ public:
                     break;
             }
         }
-        else if (e.type == SDL_KEYUP && e.key.repeat == 0)
+        else if (e.type == SDL_EVENT_KEY_UP && e.key.repeat == 0)
         {
-            switch (e.key.keysym.sym) {
+            switch (e.key.key) {
             //case SDLK_UP: yvel += speed; break;
             //case SDLK_DOWN: yvel -= speed; break;
             case SDLK_LEFT:
@@ -240,9 +247,12 @@ public:
         health = h;
     }
 
-    void addSprite(string filename, SDL_Renderer*& renderer, char dir) {
+    bool addSprite(string filename, SDL_Renderer*& renderer, char dir) {
         Wrapper* temp = new Wrapper();
-        temp->loadFromFile(filename, renderer);
+        if (!temp->loadFromFile(filename, renderer)) {
+            delete temp;
+            return false;
+        }
 
         if (dir == 'r') {
             totalFrames++;
@@ -251,6 +261,7 @@ public:
         else {
             leftImgs.push_back(temp);
         }
+        return true;
     }
 
     Wrapper* getDefaultWrapper() {

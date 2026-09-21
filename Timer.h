@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
 #include <string>
 #include <sstream>
 
@@ -10,8 +8,8 @@ using namespace std;
 
 class Timer {
 private:
-	Uint32 startTicks;
-	Uint32 pausedTicks;
+	Uint64 startTicks;
+	Uint64 pausedTicks;
 	bool paused;
 	bool started;
 public:
@@ -47,8 +45,8 @@ public:
 		}
 	}
 
-	Uint32 getTicks() {
-		Uint32 time = 0;
+	Uint64 getTicks() {
+		Uint64 time = 0;
 		if (started) {
 			if (paused) {
 				time = pausedTicks;

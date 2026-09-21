@@ -1,9 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
 
 #include "Wrapper.h"
 #include "themainbro.h"
@@ -13,7 +11,6 @@ using namespace std;
 
 class PoG {
 private:
-	SDL_Surface *screen, *block;
 	SDL_Rect camera;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
@@ -28,39 +25,32 @@ private:
 	static const int SC_HEIGHT = 480;
 
 	bool initialize() {
-		bool success = true;
-		if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-			success = false;
-		} else {
-			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-			window = SDL_CreateWindow("PoG", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-				SC_WIDTH, SC_HEIGHT, SDL_WINDOW_SHOWN);
-			if (window == NULL) {
-				success = false;
-			} else {
-				renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-				if (renderer == NULL) {
-					success = false;
-				} else {
-					SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-					int imgFlags = IMG_INIT_PNG;
-					if (!(IMG_Init(imgFlags) & imgFlags)) {
-						success = false;
-					}
-				}
-			}
+		if (!SDL_Init(SDL_INIT_VIDEO)) {
+			SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+			return false;
 		}
-		return success;
+		window = SDL_CreateWindow("PoG", SC_WIDTH, SC_HEIGHT, 0);
+		if (window == NULL) {
+			SDL_Log("Unable to create window: %s", SDL_GetError());
+			return false;
+		}
+		renderer = SDL_CreateRenderer(window, NULL);
+		if (renderer == NULL) {
+			SDL_Log("Unable to create renderer: %s", SDL_GetError());
+			return false;
+		}
+		if (!SDL_SetRenderVSync(renderer, 1)) {
+			SDL_Log("VSync unavailable: %s", SDL_GetError());
+		}
+		return SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	}
 
 	bool loadImages() {
-		bool success = true;
-		cherub.addSprite("chars/neutralright.png", renderer, 'r');
-		cherub.addSprite("chars/walk1right.png", renderer, 'r');
-		cherub.addSprite("chars/neutralleft.png", renderer, 'l');
-		cherub.addSprite("chars/walk1left.png", renderer, 'l');
-		background->loadFromFile("backdrops/cornfield.png", renderer);
-		return success;
+		return cherub.addSprite("chars/neutralright.png", renderer, 'r') &&
+			cherub.addSprite("chars/walk1right.png", renderer, 'r') &&
+			cherub.addSprite("chars/neutralleft.png", renderer, 'l') &&
+			cherub.addSprite("chars/walk1left.png", renderer, 'l') &&
+			background->loadFromFile("backdrops/cornfield.png", renderer);
 	}
 
 	void handEvents() {
@@ -68,31 +58,29 @@ private:
 	}
 
 	void terminate() {
+		cherub.clearSprites();
+		delete background;
+		background = NULL;
+		SDL_DestroyRenderer(renderer);
+		renderer = NULL;
 		SDL_DestroyWindow(window);
 		window = NULL;
-		IMG_Quit();
 		SDL_Quit();
-        delete background;
 	}
 
 public:
 
-	PoG() : cherub() {
-		screen = SDL_GetWindowSurface(window);
-		camera.x = camera.y = 0;
-        background = new Wrapper();
-	}
+	PoG() : camera(), window(NULL), renderer(NULL), background(new Wrapper()), cherub() {}
+
 	~PoG() {
 		terminate();
 	}
-	void play() {
+	bool play() {
 		if (!initialize()) {
-			//system("PAUSE");
-			return;
+			return false;
 		}
 		if (!loadImages()) {
-			//system("PAUSE");
-			return;
+			return false;
 		}
 		bool quit = false;
 		SDL_Event e;
@@ -101,7 +89,7 @@ public:
 
 		while (!quit) {
 			while (SDL_PollEvent(&e)) {
-				if (e.type == SDL_QUIT) {
+				if (e.type == SDL_EVENT_QUIT) {
 					quit = true;
 				}
 				cherub.handle_input(e);
@@ -121,5 +109,6 @@ public:
 			
 			SDL_RenderPresent(renderer);
 		}
+		return true;
 	}
 };

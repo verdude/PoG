@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <string>
 
 using namespace std;
@@ -30,21 +30,26 @@ public:
 		SDL_Texture* newTexture = NULL;
 		SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 		if (loadedSurface == NULL) {
-			printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
+			printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), SDL_GetError());
 		}
 		else {
             //printf("The image address: %p", loadedSurface);
-			SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+			if (!SDL_SetSurfaceColorKey(loadedSurface, true, SDL_MapSurfaceRGB(loadedSurface, 0, 0xFF, 0xFF))) {
+                printf("Unable to set color key for %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+                SDL_DestroySurface(loadedSurface);
+                return false;
+            }
 
 			newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 			if (newTexture == NULL) {
 				printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
 			}
 			else {
+				SDL_SetTextureScaleMode(newTexture, SDL_SCALEMODE_LINEAR);
 				width = loadedSurface->w;
 				height = loadedSurface->h;
 			}
-			SDL_FreeSurface(loadedSurface);
+			SDL_DestroySurface(loadedSurface);
 		}
 		texture = newTexture;
 		return texture != NULL;
@@ -69,12 +74,12 @@ public:
 	}
 
 	void render(int x, int y, SDL_Renderer*& renderer, bool log = false, SDL_Rect* clip = NULL, 
-		double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE) {
+		double angle = 0.0, SDL_Point* center = NULL, SDL_FlipMode flip = SDL_FLIP_NONE) {
 
-		SDL_Rect renderQuad = { x, y, width, height};
-		int code = SDL_RenderCopy(renderer, texture, NULL, &renderQuad);
-        if (code < 0) {
-            printf("Error rendering Texture [%s]. Got Error code: [%i]\n", name.c_str(), code);
+		SDL_FRect renderQuad = { static_cast<float>(x), static_cast<float>(y),
+            static_cast<float>(width), static_cast<float>(height) };
+        if (!SDL_RenderTexture(renderer, texture, NULL, &renderQuad)) {
+            printf("Error rendering texture [%s]: %s\n", name.c_str(), SDL_GetError());
         } else if (log) {
             printf("Rendering [%s]\n", name.c_str());
         }
